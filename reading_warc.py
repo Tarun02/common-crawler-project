@@ -8,7 +8,7 @@ import gzip
 """ 
 Required Fields:
 
-URI, Content-length, IP Address, server, All the meta-content
+URI, Content-length, IP Address, server, Title, All the meta-content
 """
 
 html_parser = HTMLParser()
@@ -28,15 +28,22 @@ with gzip.open('warc.paths.gz') as file_data:
                 server_ip_address = nested_record.rec_headers.get_header('WARC-IP-Address')
                 server_name = nested_record.http_headers['Server']
                 
-                web_page = BeautifulSoup(nested_record.content_stream().read(), "html.parser")
-                web_page_title = web_page.title.string
-
-                print(web_page.meta)
+                web_page = BeautifulSoup(nested_record.content_stream().read(), "html.parser", from_encoding='iso-8859-8')
+                if web_page.title:
+                    title = web_page.title.string
+                
+                final_dict = {}
                 metadata_dict = {}
-                for tag in web_page_metadata:
-                    print(tag.get("property",None))
-                    metadata_dict[tag.get("property",None)] = tag.get("content",None)
+                for tag in web_page.find_all('meta'):
+                    if tag:
+                        temp_dict = tag.attrs
+                        for key in (temp_dict.keys() | metadata_dict.keys()):
+                            if key in temp_dict: final_dict.setdefault(key, []).append(temp_dict[key])
+                            if key in metadata_dict: final_dict.setdefault(key, []).append(metadata_dict[key])
+                    temp_dict = final_dict
 
-                print(metadata_dict)
-                break
-        break
+                print(final_dict)
+
+""" 
+Now need to make this into a Spark Code and push the final values into JSON format.
+"""
