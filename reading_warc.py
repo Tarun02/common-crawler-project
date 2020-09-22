@@ -4,6 +4,7 @@ from html.parser import HTMLParser
 
 import requests
 import gzip
+import boto3
 
 """ 
 Required Fields:
@@ -12,6 +13,12 @@ URI, Content-length, IP Address, server, Title, All the meta-content
 """
 
 html_parser = HTMLParser()
+
+bucketname = 'yernt-bgdata'
+filename = 'common-crawl/input_data/warc.paths.gz'
+
+s3 = boto3.resource('s3')
+s3.Bucket(bucketname).download_file(filename, 'warc.paths.gz')
 
 with gzip.open('warc.paths.gz') as file_data:
     
