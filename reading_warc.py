@@ -12,6 +12,8 @@ Required Fields:
 URI, Content-length, IP Address, server, Title, All the meta-content
 """
 
+spark = SparkSession.builder.appName('common-crawl').getOrCreate()
+
 html_parser = HTMLParser()
 
 bucketname = 'yernt-bgdata'
@@ -19,6 +21,17 @@ filename = 'common-crawl/input_data/warc.paths.gz'
 
 s3 = boto3.resource('s3')
 s3.Bucket(bucketname).download_file(filename, 'warc.paths.gz')
+
+user_schema = st.StructType([
+    st.StructField('URL', st.StringType(), False),
+    st.StructField('Content-length', st.IntegerType(), False),
+    st.StructField('IP Address', st.StringType(), False),
+    st.StructField('Server', st.StringType(), True),
+    st.StructField('Title', st.StringType(), True),
+    st.StructField('MetaData', st.MapType(st.StringType(), st.StringType(), True), True)
+])
+
+final_data = []
 
 with gzip.open('warc.paths.gz') as file_data:
     
