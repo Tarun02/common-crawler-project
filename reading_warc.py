@@ -1,10 +1,12 @@
 from warcio.archiveiterator import ArchiveIterator
 from bs4 import BeautifulSoup
 from html.parser import HTMLParser
+from pyspark.sql import SparkSession
 
 import requests
 import gzip
 import boto3
+import pyspark.sql.types as st
 
 """ 
 Required Fields:
