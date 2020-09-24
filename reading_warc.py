@@ -41,16 +41,21 @@ with gzip.open('warc.paths.gz') as file_data:
                 
                 final_dict = {}
                 metadata_dict = {}
-                for tag in web_page.find_all('meta'):
-                    if tag:
-                        temp_dict = tag.attrs
-                        for key in (temp_dict.keys() | metadata_dict.keys()):
-                            if key in temp_dict: final_dict.setdefault(key, []).append(temp_dict[key])
-                            if key in metadata_dict: final_dict.setdefault(key, []).append(metadata_dict[key])
-                    temp_dict = final_dict
+                try:
+                    for tag in web_page.find_all('meta'):
+                        if tag:
+                            temp_dict = tag.attrs
+                            for key in (temp_dict.keys() | metadata_dict.keys()):
+                                if key in temp_dict: final_dict.setdefault(key, []).append(temp_dict[key])
+                                if key in metadata_dict: final_dict.setdefault(key, []).append(metadata_dict[key])
+                        temp_dict = final_dict
+                except:
+                    print(metadata_dict)
+            final_data.extend([web_uri, content_length, server_ip_address, server_name, title, final_dict])
+    
+    final_df = spark.createDataFrame(final_data, user_schema)
 
-                print(final_dict)
-
+final_df.write.json('s3://yernt-bgdata/common-crawl/output_data/')
 """ 
 Now need to make this into a Spark Code and push the final values into JSON format.
 """
