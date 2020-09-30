@@ -73,7 +73,7 @@ with gzip.open('warc.paths.gz') as file_data:
     
     final_df = spark.createDataFrame(final_data, user_schema)
 
-final_df.write.partitionBy('title').json('s3://yernt-bgdata/common-crawl/output_data/')
+final_df.write.partitionBy('title').parquet('s3://yernt-bgdata/common-crawl/output_data/')
 """ 
 Now need to make this into a Spark Code and push the final values into JSON format.
 """
